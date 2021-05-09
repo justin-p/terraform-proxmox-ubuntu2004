@@ -20,7 +20,8 @@ resource "null_resource" "wait_for_ssh" {
   # Waiting for server to accept SSH connections and cloud-init to finish
   provisioner "remote-exec" {
     inline = [
-      "echo 'Waiting for ssh...'"
+      "echo 'Waiting for cloud-init...'",
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done"      
     ]
   }
 }
