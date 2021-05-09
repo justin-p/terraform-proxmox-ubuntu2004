@@ -11,7 +11,7 @@ Module includes 2 ansible playbooks that are replaced on every Terraform apply.
 
 ```terraform
 module "ubuntu_vm" {
-  source = "github.com/justin-p/terraform-proxmox-ubuntu2004?ref=0.0.1"
+  source = "github.com/justin-p/terraform-proxmox-ubuntu2004?ref=v0.0.1"
 
   proxmox_endpoint      = "https://192.168.10.10:8006/"
   proxmox_username      = "root@pam"
