@@ -1,0 +1,9 @@
+---
+- hosts: all
+  tasks:
+    - name: Ensure cloud-init is uninstalled
+      ansible.builtin.package:
+        name: cloud-init
+        state: absent
+        purge: yes
+      become: yes

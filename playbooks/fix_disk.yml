@@ -1,0 +1,46 @@
+---
+- hosts: all
+  tasks:
+    - name: Move partition header to the end of the disk
+      ansible.builtin.command: sgdisk -e /dev/vda
+      become: yes
+
+    - name: Reregister the partition
+      ansible.builtin.command: partprobe /dev/vda
+      become: yes
+
+    - name: Read device information
+      community.general.parted: 
+        device: /dev/vda
+        unit: MiB
+      register: disk_info
+      become: yes
+
+    - name: Extend /dev/vda{{ disk_info.partitions | length }} to fill all available space
+      community.general.parted:
+        device: /dev/vda
+        number: "{{ disk_info.partitions | length }}"
+        label: gpt
+        unit: MiB        
+        part_end: "100%"
+        resize: true
+        state: present
+      become: yes
+
+    - name: Resize the volume group to use all available space on /dev/vda{{ disk_info.partitions | length }}
+      community.general.lvg:
+        vg: ubuntu-vg
+        pvs: /dev/vda{{ disk_info.partitions | length }}
+        pvresize: yes
+      become: yes
+
+    - name: Extend the logical volume to use all remaining space in the volume group
+      community.general.lvol:
+        vg: ubuntu-vg
+        lv: ubuntu-lv
+        size: +100%FREE
+      become: yes
+
+    - name: Resize filesystem
+      ansible.builtin.command: resize2fs /dev/ubuntu-vg/ubuntu-lv
+      become: yes
